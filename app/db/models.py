@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, String, ForeignKey, UUID, Boolean, Integer, Float, ARRAY, JSON
+from sqlalchemy import Column, DateTime, String
 from sqlalchemy.ext.declarative import DeclarativeMeta, declarative_base
 
 Base: DeclarativeMeta = declarative_base()

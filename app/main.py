@@ -5,7 +5,7 @@ from starlette.middleware.cors import CORSMiddleware
 from app.core.config import settings
 
 
-app = FastAPI(title="App")
+app = FastAPI(title="Repair Workshop")
 
 app.add_middleware(
     CORSMiddleware,
