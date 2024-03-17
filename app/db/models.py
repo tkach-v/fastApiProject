@@ -15,7 +15,7 @@ class TimestampMixin(object):
 class Users(TimestampMixin, Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
     is_superuser = Column(Boolean, default=False)
@@ -24,7 +24,7 @@ class Users(TimestampMixin, Base):
 class Orders(TimestampMixin, Base):
     __tablename__ = "orders"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String, nullable=False)
     description = Column(String, nullable=False)
     customer_id = Column(Integer, ForeignKey("users.id"))
@@ -35,9 +35,9 @@ class Orders(TimestampMixin, Base):
 class Reviews(TimestampMixin, Base):
     __tablename__ = "reviews"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     text = Column(String, nullable=False)
-    rating = Column(Integer, primary_key=True)
+    rating = Column(Integer, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"))
     reviewer_id = Column(Integer, ForeignKey("users.id"))
 

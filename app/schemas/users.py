@@ -18,7 +18,7 @@ class UserUpdate(BaseModel):
     password: Optional[str] = None
 
 
-class UserGet(UserBase):
+class User(UserBase):
     id: int
 
     class Config:
