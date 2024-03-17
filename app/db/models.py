@@ -29,7 +29,7 @@ class Orders(TimestampMixin, Base):
     description = Column(String, nullable=False)
     customer_id = Column(Integer, ForeignKey("users.id"))
     performer_id = Column(Integer, ForeignKey("users.id"))
-    completed = Column(Boolean, nullable=True)
+    completed = Column(Boolean, nullable=False, default=False)
 
 
 class Reviews(TimestampMixin, Base):
