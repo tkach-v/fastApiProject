@@ -1,13 +1,13 @@
-from typing import Optional
+from pydantic import BaseModel, Field
 
-from pydantic import BaseModel
+from app.schemas.common import PyObjectId
 
 
 class OrderBase(BaseModel):
     title: str
     description: str
-    customer_id: int
-    performer_id: int
+    customer_id: PyObjectId
+    performer_id: PyObjectId
 
 
 class OrderCreate(OrderBase):
@@ -15,7 +15,7 @@ class OrderCreate(OrderBase):
 
 
 class Order(OrderBase):
-    id: int
+    id: PyObjectId = Field(alias="_id")
     completed: bool
 
     class Config:

@@ -1,12 +1,12 @@
 import uvicorn
 from fastapi import FastAPI, APIRouter
+from motor.motor_asyncio import AsyncIOMotorClient
 from starlette.middleware.cors import CORSMiddleware
 from app.routers.users import router as users_router
 from app.routers.orders import router as orders_router
 from app.routers.reviews import router as reviews_router
 
 from app.core.config import settings
-
 
 app = FastAPI(title="Repair Workshop")
 
@@ -17,6 +17,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.on_event("startup")
+async def startup_db_client():
+    app.mongodb_client = AsyncIOMotorClient(settings.MONGODB_URL)
+    app.mongodb = app.mongodb_client['repair_workshop']
+
+
+@app.on_event("shutdown")
+async def shutdown_db_client():
+    app.mongodb_client.close()
+
 
 router = APIRouter(tags=["Health Check"])
 

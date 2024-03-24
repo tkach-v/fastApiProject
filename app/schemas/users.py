@@ -1,6 +1,7 @@
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from app.schemas.common import PyObjectId
 
 
 class UserBase(BaseModel):
@@ -19,7 +20,4 @@ class UserUpdate(BaseModel):
 
 
 class User(UserBase):
-    id: int
-
-    class Config:
-        orm_mode = True
+    id: PyObjectId = Field(alias="_id")

@@ -1,11 +1,12 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, Field
+from app.schemas.common import PyObjectId
 
 
 class ReviewBase(BaseModel):
     text: str
     rating: int
-    user_id: int
-    reviewer_id: int
+    user_id: PyObjectId
+    reviewer_id: PyObjectId
 
     @field_validator('rating')
     def validate_rating(cls, value):
@@ -19,7 +20,7 @@ class ReviewCreate(ReviewBase):
 
 
 class Review(ReviewBase):
-    id: int
+    id: PyObjectId = Field(alias="_id")
 
     class Config:
         orm_mode = True

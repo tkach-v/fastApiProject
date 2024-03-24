@@ -1,38 +1,51 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from bson import ObjectId
+from fastapi import APIRouter, HTTPException, status, Request
 
-from app.db import models
-from app.db.connection import get_db
 from app.schemas.reviews import Review, ReviewCreate
 
 router = APIRouter(prefix="/reviews", tags=["Reviews"])
 
 
 @router.get("/", summary="Get list of reviews", response_model=list[Review])
-def get_reviews(db: Session = Depends(get_db)):
-    orders = db.query(models.Reviews).all()
-    return orders
+async def get_reviews(request: Request):
+    review = await request.app.mongodb["reviews"].find().to_list(1000)
+    return review
 
 
 @router.get("/{id}", summary="Get review by id", response_model=Review)
-def get_review(id: int, db: Session = Depends(get_db)):
-    order = db.query(models.Reviews).filter(models.Reviews.id == id).first()
-    if not order:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Review not found")
-    return order
+async def get_review(id: str, request: Request):
+    if not ObjectId.is_valid(id):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid ObjectId")
 
-@router.post("/", response_model=Review, summary="Create a new review")
-def create_review(review: ReviewCreate, db: Session = Depends(get_db)):
-    user = db.query(models.Users).filter(models.Users.id == review.user_id).first()
+    review = await request.app.mongodb["reviews"].find_one({"_id": ObjectId(id)})
+    if not review:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Review not found")
+    return review
+
+
+@router.post("/", summary="Create a new review", response_model=Review)
+async def create_review(review: ReviewCreate, request: Request):
+    try:
+        user_id = ObjectId(review.user_id)
+        reviewer_id = ObjectId(review.reviewer_id)
+    except Exception:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid ObjectId")
+
+    user = await request.app.mongodb["users"].find_one({"_id": user_id})
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
-    reviewer = db.query(models.Users).filter(models.Users.id == review.reviewer_id).first()
+    reviewer = await request.app.mongodb["users"].find_one({"_id": reviewer_id})
     if reviewer is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reviewer not found")
 
-    new_review = models.Reviews(**review.model_dump())
-    db.add(new_review)
-    db.commit()
-    db.refresh(new_review)
-    return new_review
+    new_review = await request.app.mongodb["reviews"].insert_one({
+        **review.model_dump(),
+        "user_id": user_id,
+        "reviewer_id": reviewer_id,
+    })
+    created_review = await request.app.mongodb["reviews"].find_one(
+        {"_id": new_review.inserted_id}
+    )
+
+    return created_review
