@@ -1,11 +1,16 @@
 import uvicorn
 from fastapi import FastAPI, APIRouter
 from starlette.middleware.cors import CORSMiddleware
+
+from app.db.connection import engine
 from app.routers.users import router as users_router
 from app.routers.orders import router as orders_router
 from app.routers.reviews import router as reviews_router
 
 from app.core.config import settings
+from app.db.models import Base
+
+Base.metadata.create_all(bind=engine)
 
 
 app = FastAPI(title="Repair Workshop")
